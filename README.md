@@ -1,4 +1,4 @@
-# Umbraco.Image.Proccessing.Integrations
+# Umbraco.Image.Processing.Integrations
 
 A pluggable image-processing abstraction for Umbraco.
 
