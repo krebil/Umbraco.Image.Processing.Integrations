@@ -86,6 +86,32 @@ public class ImageCommandParserTests
     }
 
     [Fact]
+    public void ParsesFocalPoint()
+    {
+        ParsedImageCommand result = ImageCommandParser.Parse(Query((ImageProcessingCommandNames.FocalPoint, "0.25,0")), Options);
+        Assert.Equal(new ImageFocalPoint(0.25f, 0f), result.FocalPoint);
+        Assert.False(result.HasProcessingCommands);
+    }
+
+    [Fact]
+    public void ClampsFocalPointToTheImage()
+    {
+        ParsedImageCommand result = ImageCommandParser.Parse(Query((ImageProcessingCommandNames.FocalPoint, "-1,2")), Options);
+        Assert.Equal(new ImageFocalPoint(0f, 1f), result.FocalPoint);
+    }
+
+    [Theory]
+    [InlineData("0.5")]
+    [InlineData("0.5,0.5,0.5")]
+    [InlineData("left,top")]
+    [InlineData("NaN,0.5")]
+    public void IgnoresMalformedFocalPoint(string raw)
+    {
+        ParsedImageCommand result = ImageCommandParser.Parse(Query((ImageProcessingCommandNames.FocalPoint, raw)), Options);
+        Assert.Null(result.FocalPoint);
+    }
+
+    [Fact]
     public void ModeDefaultsToCropWhenAbsent()
     {
         ParsedImageCommand result = ImageCommandParser.Parse(Query(), Options);

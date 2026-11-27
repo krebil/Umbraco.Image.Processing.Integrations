@@ -133,4 +133,50 @@ public class ResizeCalculatorTests
 
         Assert.Equal(stretch, manual);
     }
+
+    [Fact]
+    public void Crop_FocalPointAtTop_KeepsTheTopOfATallSource()
+    {
+        ResizeResolution result = ResizeCalculator.Resolve(1600, 2116, 400, 400, ResizeMode.Crop, new ImageFocalPoint(0.5f, 0f));
+
+        Assert.Equal(new ResizeResolution(400, 400, new CropRectangle(0, 0, 1600, 1600), null), result);
+    }
+
+    [Fact]
+    public void Crop_FocalPointAtBottom_KeepsTheBottomOfATallSource()
+    {
+        ResizeResolution result = ResizeCalculator.Resolve(1600, 2116, 400, 400, ResizeMode.Crop, new ImageFocalPoint(0.5f, 1f));
+
+        Assert.Equal(new CropRectangle(0, 516, 1600, 1600), result.Crop);
+    }
+
+    [Fact]
+    public void Crop_OffCenterFocalPoint_CentersTheCropOnIt()
+    {
+        // 100 wide kept of 200; the focal point at x=60 puts the cut at 10..110.
+        ResizeResolution result = ResizeCalculator.Resolve(200, 100, 50, 50, ResizeMode.Crop, new ImageFocalPoint(0.3f, 0.5f));
+
+        Assert.Equal(new CropRectangle(10, 0, 100, 100), result.Crop);
+    }
+
+    [Fact]
+    public void Crop_CenteredFocalPoint_MatchesNoFocalPoint()
+    {
+        ResizeResolution centered = ResizeCalculator.Resolve(200, 100, 50, 50, ResizeMode.Crop, new ImageFocalPoint(0.5f, 0.5f));
+
+        Assert.Equal(ResizeCalculator.Resolve(200, 100, 50, 50, ResizeMode.Crop), centered);
+    }
+
+    [Theory]
+    [InlineData(ResizeMode.Pad)]
+    [InlineData(ResizeMode.BoxPad)]
+    [InlineData(ResizeMode.Max)]
+    [InlineData(ResizeMode.Min)]
+    [InlineData(ResizeMode.Stretch)]
+    public void OtherModes_IgnoreTheFocalPoint(ResizeMode mode)
+    {
+        ResizeResolution withFocalPoint = ResizeCalculator.Resolve(200, 100, 50, 50, mode, new ImageFocalPoint(0.1f, 0.9f));
+
+        Assert.Equal(ResizeCalculator.Resolve(200, 100, 50, 50, mode), withFocalPoint);
+    }
 }

@@ -40,6 +40,11 @@ public sealed class ImageProcessingUrlGenerator(IOptions<ImageProcessingOptions>
             query[ImageProcessingCommandNames.Crop] = FormattableString.Invariant($"{crop.Left},{crop.Top},{crop.Right},{crop.Bottom}");
         }
 
+        if (options.FocalPoint is { } focalPoint)
+        {
+            query[ImageProcessingCommandNames.FocalPoint] = FormattableString.Invariant($"{focalPoint.Left},{focalPoint.Top}");
+        }
+
         if (options.Width is { } width)
         {
             query[ImageProcessingCommandNames.Width] = width.ToString(CultureInfo.InvariantCulture);

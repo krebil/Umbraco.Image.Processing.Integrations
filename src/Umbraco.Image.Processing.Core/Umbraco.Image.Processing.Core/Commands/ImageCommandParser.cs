@@ -61,6 +61,13 @@ public static class ImageCommandParser
             crop = coordinates;
         }
 
+        ImageFocalPoint? focalPoint = null;
+        if (query.TryGetValue(ImageProcessingCommandNames.FocalPoint, out var focalPointValue) &&
+            ImageFocalPoint.TryParse(focalPointValue.ToString(), out ImageFocalPoint parsedFocalPoint))
+        {
+            focalPoint = parsedFocalPoint;
+        }
+
         return new ParsedImageCommand
         {
             Width = width,
@@ -71,6 +78,7 @@ public static class ImageCommandParser
             BackgroundColor = backgroundColor,
             AutoOrient = autoOrient,
             Crop = crop,
+            FocalPoint = focalPoint,
         };
     }
 

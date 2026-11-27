@@ -3,7 +3,7 @@ using System.Globalization;
 namespace Umbraco.Image.Processing.Core.Commands;
 
 /// <summary>
-/// Umbraco's <c>cc</c> crop/focal-point command: four normalized (0..1) distances from the
+/// Umbraco's <c>cc</c> crop command: four normalized (0..1) distances from the
 /// left, top, right, and bottom edges of the original image.
 /// </summary>
 public readonly record struct ImageCropCoordinates(float Left, float Top, float Right, float Bottom)

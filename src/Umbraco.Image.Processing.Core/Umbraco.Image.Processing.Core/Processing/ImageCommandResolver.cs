@@ -28,7 +28,7 @@ public static class ImageCommandResolver
             (workingWidth, workingHeight) = (workingHeight, workingWidth);
         }
 
-        ResizeResolution resize = ResizeCalculator.Resolve(workingWidth, workingHeight, parsed.Width, parsed.Height, parsed.Mode);
+        ResizeResolution resize = ResizeCalculator.Resolve(workingWidth, workingHeight, parsed.Width, parsed.Height, parsed.Mode, parsed.FocalPoint);
 
         return new ResolvedImageCommand
         {

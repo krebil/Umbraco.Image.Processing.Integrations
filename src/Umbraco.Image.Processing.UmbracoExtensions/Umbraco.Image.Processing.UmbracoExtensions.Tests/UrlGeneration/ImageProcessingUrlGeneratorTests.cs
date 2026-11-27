@@ -71,6 +71,21 @@ public class ImageProcessingUrlGeneratorTests
     }
 
     [Fact]
+    public void BuildsFocalPointCommand()
+    {
+        var options = new ImageUrlGenerationOptions("/media/foo.jpg")
+        {
+            Width = 300,
+            Height = 300,
+            FocalPoint = new ImageUrlGenerationOptions.FocalPointPosition(0.25m, 0m),
+        };
+
+        string? url = CreateGenerator().GetImageUrl(options);
+
+        Assert.Equal("/media/foo.jpg?height=300&rxy=0.25,0&width=300", url);
+    }
+
+    [Fact]
     public void AppendsValidHmacTokenWhenSigningEnabled()
     {
         byte[] secret = Encoding.UTF8.GetBytes("test-secret");
