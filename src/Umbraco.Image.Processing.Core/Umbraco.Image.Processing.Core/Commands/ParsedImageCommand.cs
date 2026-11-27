@@ -24,6 +24,9 @@ public sealed record ParsedImageCommand
 
     public ImageCropCoordinates? Crop { get; init; }
 
+    /// <summary>Where <see cref="ResizeMode.Crop" /> centers its cut. Not a processing command on its own: it only steers a resize.</summary>
+    public ImageFocalPoint? FocalPoint { get; init; }
+
     public bool HasProcessingCommands =>
         Width is not null || Height is not null || Format is not null || Quality is not null ||
         BackgroundColor is not null || Crop is not null;

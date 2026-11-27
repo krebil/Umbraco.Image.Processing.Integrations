@@ -55,12 +55,11 @@ cached derivatives are regenerated once. URLs and HMAC signatures are unchanged.
 ## Supported processing commands
 
 The command surface matches ImageSharp.Web's `width`, `height`, `rmode`, `format`,
-`quality`, `bgcolor`, and `autoorient`, plus Umbraco's own `cc` crop/focal-point
-command.
+`quality`, `bgcolor`, `autoorient`, and `rxy` (the focal point `rmode=crop` cuts
+around), plus Umbraco's own `cc` crop command.
 
 Not yet supported, tracked as GitHub issues:
 [`ranchor`](https://github.com/krebil/Umbraco.Image.Proccessing.Integrations/issues/3) (resize anchor),
-[`rxy`](https://github.com/krebil/Umbraco.Image.Proccessing.Integrations/issues/4) (resize focal point),
 [`rcolor`](https://github.com/krebil/Umbraco.Image.Proccessing.Integrations/issues/5) (resize pad color),
 [`rsampler`](https://github.com/krebil/Umbraco.Image.Proccessing.Integrations/issues/6) (resize resampler),
 [`orient`](https://github.com/krebil/Umbraco.Image.Proccessing.Integrations/issues/7) (resize orientation flag), and

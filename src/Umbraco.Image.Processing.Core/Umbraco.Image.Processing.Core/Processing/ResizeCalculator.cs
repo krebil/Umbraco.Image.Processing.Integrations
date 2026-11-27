@@ -6,16 +6,19 @@ namespace Umbraco.Image.Processing.Core.Processing;
 /// Computes the final canvas size plus an optional crop or placement rectangle for a resize mode.
 /// Ported from <c>SixLabors.ImageSharp.Processing.Processors.Transforms.ResizeHelper.CalculateTargetLocationAndBounds</c>
 /// (github.com/SixLabors/ImageSharp, src/ImageSharp/Processing/Processors/Transforms/Resize/ResizeHelper.cs),
-/// restricted to that method's default/center-anchor branch — this package has no <c>rxy</c>/<c>ranchor</c>
-/// equivalent (focal-point-aware centering is Umbraco's own <c>cc</c> command instead, applied separately
-/// before this ever runs), so every mode behaves as ImageSharp's own "unspecified position" case.
+/// restricted to that method's default/center-anchor branch plus <c>rxy</c> (<c>CenterCoordinates</c>), which
+/// as in ImageSharp only moves <see cref="ResizeMode.Crop" />'s rectangle. There is no <c>ranchor</c>
+/// equivalent, so every other mode behaves as ImageSharp's own "unspecified position" case.
 /// <c>Manual</c> is routed identically to <c>Stretch</c>: ImageSharp.Web's own query-string surface always
 /// resolves Manual's target rectangle to <c>(0,0,width,height)</c> — indistinguishable from Stretch when
 /// driven purely by a URL, which is this package's only entry point.
 /// </summary>
 public static class ResizeCalculator
 {
-    public static ResizeResolution Resolve(int sourceWidth, int sourceHeight, int? requestedWidth, int? requestedHeight, ResizeMode mode)
+    public static ResizeResolution Resolve(int sourceWidth, int sourceHeight, int? requestedWidth, int? requestedHeight, ResizeMode mode) =>
+        Resolve(sourceWidth, sourceHeight, requestedWidth, requestedHeight, mode, focalPoint: null);
+
+    public static ResizeResolution Resolve(int sourceWidth, int sourceHeight, int? requestedWidth, int? requestedHeight, ResizeMode mode, ImageFocalPoint? focalPoint)
     {
         if (requestedWidth is null && requestedHeight is null)
         {
@@ -29,7 +32,7 @@ public static class ResizeCalculator
 
         return mode switch
         {
-            ResizeMode.Crop => ResolveCrop(sourceWidth, sourceHeight, width, height),
+            ResizeMode.Crop => ResolveCrop(sourceWidth, sourceHeight, width, height, focalPoint),
             ResizeMode.Pad => ResolvePad(sourceWidth, sourceHeight, width, height),
             ResizeMode.BoxPad => ResolveBoxPad(sourceWidth, sourceHeight, width, height),
             ResizeMode.Max => ResolveMax(sourceWidth, sourceHeight, width, height),
@@ -38,14 +41,28 @@ public static class ResizeCalculator
         };
     }
 
-    /// <summary>Scales to cover (width, height), then crops the source's centered overflow — the standard "object-fit: cover" rectangle, in source-pixel space.</summary>
-    private static ResizeResolution ResolveCrop(int srcWidth, int srcHeight, int width, int height)
+    /// <summary>
+    /// Scales to cover (width, height), then crops the source's overflow — the standard "object-fit: cover"
+    /// rectangle, in source-pixel space. Centered on the image, or on <paramref name="focalPoint" /> as far as
+    /// the image's edges allow.
+    /// </summary>
+    private static ResizeResolution ResolveCrop(int srcWidth, int srcHeight, int width, int height, ImageFocalPoint? focalPoint)
     {
         float scale = MathF.Max(width / (float)srcWidth, height / (float)srcHeight);
         int cropWidth = Math.Min(srcWidth, Sanitize((int)MathF.Round(width / scale)));
         int cropHeight = Math.Min(srcHeight, Sanitize((int)MathF.Round(height / scale)));
-        int cropX = Math.Max(0, (srcWidth - cropWidth) / 2);
-        int cropY = Math.Max(0, (srcHeight - cropHeight) / 2);
+        int cropX;
+        int cropY;
+        if (focalPoint is { } center)
+        {
+            cropX = Math.Clamp((int)MathF.Round((center.X * srcWidth) - (cropWidth / 2F)), 0, srcWidth - cropWidth);
+            cropY = Math.Clamp((int)MathF.Round((center.Y * srcHeight) - (cropHeight / 2F)), 0, srcHeight - cropHeight);
+        }
+        else
+        {
+            cropX = Math.Max(0, (srcWidth - cropWidth) / 2);
+            cropY = Math.Max(0, (srcHeight - cropHeight) / 2);
+        }
 
         return new ResizeResolution(Sanitize(width), Sanitize(height), new CropRectangle(cropX, cropY, cropWidth, cropHeight), null);
     }
