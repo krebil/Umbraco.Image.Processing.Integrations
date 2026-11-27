@@ -15,7 +15,10 @@ namespace Umbraco.Image.Processing.Core.Processing;
 /// </summary>
 public static class ResizeCalculator
 {
-    public static ResizeResolution Resolve(int sourceWidth, int sourceHeight, int? requestedWidth, int? requestedHeight, ResizeMode mode, ImageFocalPoint? focalPoint = null)
+    public static ResizeResolution Resolve(int sourceWidth, int sourceHeight, int? requestedWidth, int? requestedHeight, ResizeMode mode) =>
+        Resolve(sourceWidth, sourceHeight, requestedWidth, requestedHeight, mode, focalPoint: null);
+
+    public static ResizeResolution Resolve(int sourceWidth, int sourceHeight, int? requestedWidth, int? requestedHeight, ResizeMode mode, ImageFocalPoint? focalPoint)
     {
         if (requestedWidth is null && requestedHeight is null)
         {
